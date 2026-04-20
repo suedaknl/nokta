@@ -28,6 +28,12 @@ export async function saveAnalysis(entry: SavedAnalysis): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
 }
 
+export async function deleteAnalysis(id: string): Promise<void> {
+  const current = await getSavedAnalyses();
+  const next = current.filter((item) => item.id !== id);
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+}
+
 export async function getAnalysisById(id: string): Promise<SavedAnalysis | null> {
   const current = await getSavedAnalyses();
   return current.find((item) => item.id === id) ?? null;

@@ -1,26 +1,32 @@
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
+import { GradientScreen } from '@/components/gradient-screen';
+import { useAppTheme } from '@/lib/theme-context';
+
 export default function ExploreScreen() {
+  const { theme } = useAppTheme();
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.header}>Explore</Text>
-        <View style={styles.card}>
-          <Text style={styles.title}>Nokta Fikir Pazari</Text>
-          <Text style={styles.description}>
-            Bu alan, trend fikir sinyallerini ve topluluk geri bildirimlerini gezmek icin ayrildi.
-            Simdilik odak Track B: Slop Detector ve teknik risk analizi.
-          </Text>
+    <GradientScreen>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <Text style={[styles.header, { color: theme.textPrimary }]}>Explore</Text>
+          <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}>
+            <Text style={[styles.title, { color: theme.textPrimary }]}>Nokta Fikir Pazari</Text>
+            <Text style={[styles.description, { color: theme.textSecondary }]}>
+              Bu alan, trend fikir sinyallerini ve topluluk geri bildirimlerini gezmek icin ayrildi.
+              Simdilik odak Track B: Slop Detector ve teknik risk analizi.
+            </Text>
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </GradientScreen>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0D14',
   },
   container: {
     flex: 1,
@@ -29,25 +35,26 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   header: {
-    color: '#F4F6FB',
-    fontSize: 30,
-    fontWeight: '700',
+    fontSize: 32,
+    fontWeight: '800',
+    letterSpacing: -0.3,
   },
   card: {
-    backgroundColor: '#111726',
-    borderRadius: 18,
+    borderRadius: 22,
     borderWidth: 1,
-    borderColor: '#1A2336',
-    padding: 16,
+    padding: 18,
+    shadowColor: '#132347',
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
   },
   title: {
-    color: '#E8EEFF',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
   },
   description: {
     marginTop: 8,
-    color: '#A8B4CF',
     fontSize: 14,
     lineHeight: 20,
   },

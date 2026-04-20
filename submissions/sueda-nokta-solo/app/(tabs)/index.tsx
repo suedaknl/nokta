@@ -1,29 +1,31 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   ActivityIndicator,
   Alert,
-  Button,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 
-import { analyzeIdeaWithGemini } from '@/lib/gemini';
+import { CircularScore } from '@/components/circular-score';
+import { GradientScreen } from '@/components/gradient-screen';
+import { PremiumButton } from '@/components/premium-button';
+import type { SlopResult } from '@/constants/slop-types';
+import { useAppTheme } from '@/lib/theme-context';
+import { analyzeIdeaWithAiService } from '@/lib/ai-service';
 import { saveAnalysis } from '@/lib/slop-storage';
 
 export default function AnalyzeScreen() {
+  const { theme } = useAppTheme();
   const [ideaText, setIdeaText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [latestResult, setLatestResult] = useState<SlopResult | null>(null);
 
   const handleAnalyze = async () => {
-    if (typeof window !== 'undefined') {
-      window.alert('FONKSIYON TETIKLENDI');
-    }
-    console.log('BUTONA BASILDI!');
-
     if (!ideaText.trim()) {
       Alert.alert('Fikir gerekli', 'Lutfen analiz etmek icin bir fikir metni gir.');
       return;
@@ -33,9 +35,9 @@ export default function AnalyzeScreen() {
     const id = Date.now().toString();
 
     try {
-      console.log('Gemini istegi basladi...');
-      const result = await analyzeIdeaWithGemini(ideaText.trim());
-      console.log('Gemini yaniti alindi.');
+      console.log('AI service istegi basladi...');
+      const result = await analyzeIdeaWithAiService(ideaText.trim());
+      console.log('AI service yaniti alindi.');
 
       await saveAnalysis({
         id,
@@ -43,8 +45,7 @@ export default function AnalyzeScreen() {
         createdAt: new Date().toISOString(),
         result,
       });
-
-      router.push('/(tabs)/vault');
+      setLatestResult(result);
     } catch (error) {
       console.error('Analyze akisi hatasi:', error);
       Alert.alert('Baglanti hatasi, lutfen tekrar deneyin');
@@ -54,109 +55,147 @@ export default function AnalyzeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.header}>Nokta | Slop Detector</Text>
-        <Text style={styles.subHeader}>Fikrini gir, acimasiz analiz sonucu yeni sayfada gelsin.</Text>
+    <LinearGradient colors={['#e0c3fc', '#8ec5fc']} style={{ flex: 1 }}>
+      <GradientScreen>
+        <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+          <Text style={[styles.header, { color: theme.textPrimary }]}>Nokta Analyzer</Text>
+          <Text style={[styles.subHeader, { color: theme.textSecondary }]}>
+            Fikrini yaz, teknik risk puanini premium analiz panelinde aninda gor.
+          </Text>
 
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>GIRISIM FIKRI</Text>
-          <TextInput
-            value={ideaText}
-            onChangeText={setIdeaText}
-            placeholder="Fikrini buraya yaz veya yapistir..."
-            placeholderTextColor="#6D7484"
-            multiline
-            textAlignVertical="top"
-            style={styles.input}
-          />
-          <View style={styles.buttonContainer}>
-            <Button
-              title={isLoading ? 'Analiz Ediliyor...' : 'Acimasizca Analiz Et'}
-              onPress={handleAnalyze}
-              disabled={isLoading}
-              color="#7A5AF8"
-            />
-          </View>
-          {isLoading && (
-            <View style={styles.loadingInline}>
-              <ActivityIndicator size="small" color="#F7F8FF" />
-              <Text style={styles.buttonText}>Gemini yaniti bekleniyor...</Text>
+          {latestResult && (
+            <View
+              style={[
+                styles.resultCard,
+                { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder },
+              ]}>
+              <Text style={[styles.resultTitle, { color: theme.textPrimary }]}>Slop Skoru</Text>
+              <CircularScore score={latestResult.slop_score} />
+              <Text style={[styles.analysisText, { color: theme.textSecondary }]}>
+                {latestResult.analysis}
+              </Text>
             </View>
           )}
-        </View>
-      </View>
-    </SafeAreaView>
+
+          <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}>
+            <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>GIRISIM FIKRI</Text>
+            <TextInput
+              value={ideaText}
+              onChangeText={setIdeaText}
+              placeholder="Fikrini buraya yaz veya yapistir..."
+              placeholderTextColor={theme.isDark ? '#7C88A8' : '#7081A7'}
+              multiline
+              textAlignVertical="top"
+              style={[
+                styles.input,
+                {
+                  color: theme.textPrimary,
+                  backgroundColor: theme.inputBackground,
+                  borderColor: theme.inputBorder,
+                },
+              ]}
+            />
+            <PremiumButton
+              onPress={handleAnalyze}
+              disabled={isLoading}
+              loading={isLoading}
+              title="Analiz Et"
+            />
+            {isLoading && (
+              <View style={styles.loadingInline}>
+                <ActivityIndicator size="small" color={theme.textSecondary} />
+                <Text style={[styles.loadingText, { color: theme.textSecondary }]}>
+                  Model yaniti bekleniyor...
+                </Text>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+      </GradientScreen>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0D14',
   },
   container: {
-    flex: 1,
     paddingHorizontal: 18,
-    paddingTop: 16,
+    paddingTop: 8,
+    paddingBottom: 32,
     gap: 12,
   },
   header: {
-    color: '#F4F6FB',
-    fontSize: 30,
-    fontWeight: '700',
-    letterSpacing: 0.2,
+    fontSize: 34,
+    fontWeight: '800',
+    letterSpacing: -0.4,
   },
   subHeader: {
-    color: '#A8B4CF',
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
   },
   card: {
     marginTop: 8,
-    backgroundColor: '#111726',
-    borderRadius: 20,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#1A2336',
-    padding: 16,
-    shadowColor: '#05070D',
-    shadowOpacity: 0.45,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 25,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 5,
   },
   sectionTitle: {
-    color: '#C8D2EA',
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: 12,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.2,
   },
   input: {
-    minHeight: 260,
-    borderRadius: 14,
+    minHeight: 220,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#27344D',
-    backgroundColor: '#0C1220',
-    color: '#EAF0FF',
-    fontSize: 15,
-    lineHeight: 21,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  buttonContainer: {
-    marginTop: 14,
-  },
-  buttonText: {
-    color: '#F7F8FF',
     fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.3,
+    lineHeight: 23,
+    paddingHorizontal: 15,
+    paddingVertical: 14,
   },
   loadingInline: {
+    marginTop: 10,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  loadingText: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  resultCard: {
+    marginTop: 8,
+    borderRadius: 28,
+    borderWidth: 1,
+    padding: 24,
+    alignItems: 'center',
+    gap: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 30,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 6,
+  },
+  resultTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  analysisText: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
   },
 });
