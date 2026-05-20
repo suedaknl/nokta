@@ -15,15 +15,24 @@
     "react-native-view-shot": ">=3"
   },
   "devDependencies": {
-    "@types/react": "~19.1.0",
+    "@types/react": "~19.2.10",
     "@types/react-native": "^0.73.0",
-    "react": "^19.2.6",
-    "react-native": "^0.85.3",
+    "react": "19.2.0",
+    "react-native": "0.83.6",
     "typescript": "~5.9.2"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~55.0.11",
     "@xtatistix/mobile-audit": "^0.1.0",
-    "docx": "^9.6.1"
+    "docx": "^9.6.1",
+    "expo": "~55.0.25",
+    "expo-file-system": "~55.0.20",
+    "expo-sharing": ">=11",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.6",
+    "react-native-view-shot": "4.0.3",
+    "react-native-web": "^0.21.0"
   },
   "keywords": [
     "react-native",
@@ -35,5 +44,11 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "start": "expo start submissions/241478058-sueda-nokta-solo",
+    "android": "expo start submissions/241478058-sueda-nokta-solo --android",
+    "ios": "expo start submissions/241478058-sueda-nokta-solo --ios",
+    "web": "expo start submissions/241478058-sueda-nokta-solo --web"
   }
 }

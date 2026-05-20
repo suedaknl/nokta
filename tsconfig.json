@@ -10,9 +10,16 @@
     "esModuleInterop": true,
     "noEmit": true,
     "paths": {
-      "react": ["../dizprotezim/frontend/node_modules/@types/react"],
-      "react-native": ["../dizprotezim/frontend/node_modules/@types/react-native"]
+      "react": [
+        "../dizprotezim/frontend/node_modules/@types/react"
+      ],
+      "react-native": [
+        "../dizprotezim/frontend/node_modules/@types/react-native"
+      ]
     }
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ],
+  "extends": "expo/tsconfig.base"
 }
